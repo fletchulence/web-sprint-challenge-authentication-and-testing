@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const User = require('./../users/users-model')
+const User = require('./../users/users-model');
 
 const {
   checkUsernameExists,
   checkUnusedUsername,
   checkPassword,
   hashPass
-} = require('./auth-middleware')
+} = require('./auth-middleware');
 
 router.post('/register', checkUnusedUsername, hashPass, async (req, res, next) => {
   // res.end('implement register, please!');
@@ -35,12 +35,12 @@ router.post('/register', checkUnusedUsername, hashPass, async (req, res, next) =
   4- On FAILED registration due to the `username` being taken,
   the response body should include a string exactly as follows: "username taken".
   */
- 
- try{
-   res.json( await User.insert(req.user))
- } catch(err){
-   next(err)
- }
+
+  try {
+    res.json(await User.insert(req.user));
+  } catch (err) {
+    next(err);
+  }
 
 });
 
@@ -71,10 +71,10 @@ router.post('/login', checkUsernameExists, checkPassword, async (req, res, next)
       the response body should include a string exactly as follows: "invalid credentials".
   */
 
-  try{
-    res.json({ message: `welcome ${req.user.username }` })
-  }catch(err){
-    next(err)
+  try {
+    res.json({ message: `welcome ${req.user.username}` });
+  } catch (err) {
+    next(err);
   }
 
 });
