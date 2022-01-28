@@ -4,10 +4,11 @@ const User = require('./../users/users-model')
 const {
   checkUsernameExists,
   checkUnusedUsername,
-  checkPassword
+  checkPassword,
+  hashPass
 } = require('./auth-middleware')
 
-router.post('/register', checkUnusedUsername, async (req, res, next) => {
+router.post('/register', checkUnusedUsername, hashPass, async (req, res, next) => {
   // res.end('implement register, please!');
   /*
   IMPLEMENT
@@ -36,7 +37,7 @@ router.post('/register', checkUnusedUsername, async (req, res, next) => {
   */
  
  try{
-   res.json( await User.insert(req.body))
+   res.json( await User.insert(req.user))
  } catch(err){
    next(err)
  }

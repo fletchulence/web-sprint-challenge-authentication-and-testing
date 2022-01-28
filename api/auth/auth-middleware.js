@@ -1,11 +1,11 @@
 const User = require('../users/users-model')
-// const bcrypt = require('bcryptjs')
-
+const bcrypt = require('bcryptjs')
+const { BCRYPT_ROUNDS } = require('./../secrets')
 
 
 //REGISTER
 const checkUnusedUsername = async (req, res, next)=>{
-   const { username, password } = req.body
+   let { username, password } = req.body
     if( !username || !password ){
        return next({ status: 400, message: 'username and password required'})
     }
@@ -14,16 +14,22 @@ const checkUnusedUsername = async (req, res, next)=>{
       if ( dbUser ){
          return next({ status: 401, message: 'username taken'})
       }
-      // req.user = req.body
+      req.user = req.body
       next()
    } catch(err){
       next(err)
    }
 }
-// const hashPass = async (req, res, next) =>{
-//    const { pasword } = req.body
-    
-// }
+const hashPass = async (req, res, next) =>{
+   let { password } = req.user
+   const hash = bcrypt.hashSync(password, BCRYPT_ROUNDS)
+   try{
+      req.user.password = hash
+      next()
+   } catch(err){
+      next(err)
+   }
+}
 
 
 
@@ -45,7 +51,6 @@ const checkUsernameExists = async (req, res, next) => {
    if( !dbUsername ){
       next({ status: 401, message: 'Invalid credentials'})
    } else {
-      // const userPassword = await User.findBy({ password })
      req.user = dbUsername
      next()
    }
@@ -73,5 +78,6 @@ const checkPassword = async (req, res, next) =>{
  module.exports = {
    checkUsernameExists,
    checkUnusedUsername,
-   checkPassword
+   checkPassword,
+   hashPass
  }
