@@ -1,6 +1,7 @@
 const User = require('../users/users-model');
 const bcrypt = require('bcryptjs');
 const { BCRYPT_ROUNDS } = require('./../secrets');
+const tokenBuilder = require('./helpers');
 
 
 //REGISTER
@@ -9,7 +10,7 @@ const checkUnusedUsername = async (req, res, next) => {
    if (!username || !password) {
       return next({ status: 400, message: 'username and password required' });
    }
-   const dbUser = await User.findBy({ username });
+   const [dbUser] = await User.findBy({ username });
    try {
       if (dbUser) {
          return next({ status: 401, message: 'username taken' });
@@ -47,7 +48,7 @@ const checkUsernameExists = async (req, res, next) => {
       if (!username || !password) {
          return next({ status: 400, message: 'username and password required' });
       }
-      const dbUsername = await User.findBy({ username });
+      const [dbUsername] = await User.findBy({ username });
       if (!dbUsername) {
          next({ status: 401, message: 'Invalid credentials' });
       } else {
@@ -59,14 +60,17 @@ const checkUsernameExists = async (req, res, next) => {
    }
 };
 
-
 const checkPassword = async (req, res, next) => {
+   const { password } = req.body;
    const userPass = await User.getById(req.user.id);
    try {
-      if (userPass.password !== req.body.password) {
-         return next({ status: 412, message: 'password dont match' });
+      if (userPass && bcrypt.compareSync(password, userPass.password)) {
+         req.user.token = tokenBuilder(userPass);
+         // req.user = userPass;
+         next();
+      } else {
+         next({ status: 412, message: 'password dont match' });
       }
-      next();
    } catch (err) {
       next(err);
    }

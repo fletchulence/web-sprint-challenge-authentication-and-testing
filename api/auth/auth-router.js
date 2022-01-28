@@ -44,7 +44,7 @@ router.post('/register', checkUnusedUsername, hashPass, async (req, res, next) =
 
 });
 
-router.post('/login', checkUsernameExists, checkPassword, async (req, res, next) => {
+router.post('/login', checkUsernameExists, checkPassword, (req, res, next) => {
 
   // res.end('implement login, please!');
   /*
@@ -70,9 +70,9 @@ router.post('/login', checkUsernameExists, checkPassword, async (req, res, next)
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
-
   try {
-    res.json({ message: `welcome ${req.user.username}` });
+    const { username, token } = req.user;
+    res.json({ message: `welcome ${username}`, token });
   } catch (err) {
     next(err);
   }

@@ -15,8 +15,8 @@ function getById(id) {
 function findBy(filter) {
    return db('users')
       .select('id', 'username')
-      .where(filter)
-      .first();
+      .where(filter);
+      // .first();
 }
 
 async function insert(user) {
