@@ -4,6 +4,7 @@ const User = require('./../users/users-model')
 const {
   checkUsernameExists,
   checkUnusedUsername,
+  checkPassword
 } = require('./auth-middleware')
 
 router.post('/register', checkUnusedUsername, async (req, res, next) => {
@@ -42,7 +43,7 @@ router.post('/register', checkUnusedUsername, async (req, res, next) => {
 
 });
 
-router.post('/login', /* checkUsernameExists, */ async (req, res, next) => {
+router.post('/login', checkUsernameExists, checkPassword, async (req, res, next) => {
 
   // res.end('implement login, please!');
   /*
@@ -69,8 +70,11 @@ router.post('/login', /* checkUsernameExists, */ async (req, res, next) => {
       the response body should include a string exactly as follows: "invalid credentials".
   */
 
-  
-
+  try{
+    res.json({ message: `welcome ${req.user.username }` })
+  }catch(err){
+    next(err)
+  }
 
 });
 

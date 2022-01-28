@@ -7,7 +7,9 @@ function getAll() {
 
 // this will get the user for appropriate login ?
 function getById(id){
-   return db('users').where({ id }).first()
+   return db('users')
+   .where({ id })
+   .first()
 }
 // honestly i think a filter would be more useful so lets build it
 function findBy(filter){
