@@ -42,10 +42,33 @@ describe('server.js', () => {
       const res = await request(server).post('/api/auth/register').send({ username: 'bob', password: 'aaa' });
       expect(res.body).toMatchObject({ message: /username taken/i });
     });
+    it('[3] encrypts the passwords instead of plain text', async () => {
+      const user = await db('users').where('username', 'bob').first();
+      expect(bcrypt.compareSync('1234', user.password)).not.toEqual('1234');
+    }, 750);
+  });
+  describe('LOGIN -- [POST] /api/auth/login', () => {
+    it('[4] responds with the correct message on valid credentials', async () => {
+      let res = await request(server).post('/api/auth/register').send({ username: 'gary', password: '1234' });
+      res = await request(server).post('/api/auth/login').send({ username: 'gary', password: '1234' });
+      expect(res.body.message).toMatch(/welcome gary/i);
+    }, 750);
+    it('[5] responds with "invalid credentials" if the user is not registered in the db', async () => {
+      let res = await request(server).post('/api/auth/login').send({ username: 'gary', password: '1234' });
+      expect(res.body).toMatchObject({ message: /invalid credentials/i });
+    });
+    it('[6] responds with a token with the correct properties', async () => {
+      let res = await request(server).post('/api/auth/login').send({ username: 'bob', password: '1234' });
+      let decode = jwtDecode(res.body.token);
+      expect(decode).toHaveProperty('exp' && 'iat');
+      expect(decode).toMatchObject({
+        subject: 1,
+        username: 'bob'
+      });
+    });
   });
   describe('[GET] api/jokes', () => {
     it('[7] jokes appear after login if valid token', async () => {
-      // given user is already registered
       let res = await request(server).post('/api/auth/login').send({ username: 'bob', password: '1234' });
       res = await request(server).get('/api/jokes').set('Authorization', res.body.token);
       expect(res.body).toHaveLength(3);
