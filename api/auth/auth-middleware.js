@@ -69,7 +69,7 @@ const checkPassword = async (req, res, next) => {
          // req.user = userPass;
          next();
       } else {
-         next({ status: 412, message: 'password dont match' });
+         next({ status: 412, message: 'invalid credentials' });
       }
    } catch (err) {
       next(err);
