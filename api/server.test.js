@@ -37,6 +37,22 @@ describe('server.js', () => {
       const [users] = await db('users');
       expect(users.username).toEqual('bob');
     });
-    
+    it('[2] responds with "username taken" if someone tries to register a username which already exists', async () => {
+      await request(server).post('/api/auth/register').send({ username: 'bob', password: '1234' });
+      const res = await request(server).post('/api/auth/register').send({ username: 'bob', password: 'aaa' });
+      expect(res.body).toMatchObject({ message: /username taken/i });
+    });
+  });
+  describe('[GET] api/jokes', () => {
+    it('[7] jokes appear after login if valid token', async () => {
+      // given user is already registered
+      let res = await request(server).post('/api/auth/login').send({ username: 'bob', password: '1234' });
+      res = await request(server).get('/api/jokes').set('Authorization', res.body.token);
+      expect(res.body).toHaveLength(3);
+    });
+    it('[8] "token required" appears if there is no token on login', async () => {
+      let res = await request(server).get('/api/jokes');
+      expect(res.body).toMatchObject({ message: /token required/i });
+    });
   });
 });
